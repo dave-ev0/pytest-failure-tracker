@@ -1,0 +1,10 @@
+flake8
+pytest
+tox
+coverage
+sphinx
+watchdog
+twine
+wheel
+bump2version
+setuptools

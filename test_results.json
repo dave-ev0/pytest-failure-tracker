@@ -1,0 +1,46 @@
+{
+  "tests/test_failure_tracker.py::test_plugin_OK": {
+    "passes": 2,
+    "failures": 0,
+    "skips": 0,
+    "last_failure": null
+  },
+  "tests/test_failure_tracker.py::test_plugin_failure": {
+    "passes": 0,
+    "failures": 2,
+    "skips": 0,
+    "last_failure": {
+      "timestamp": "2024-07-16T12:18:45.649703",
+      "traceback": [
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/runner.py\", line 341, in from_call\n    result: Optional[TResult] = func()\n                                ^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/runner.py\", line 241, in <lambda>\n    lambda: runtest_hook(item=item, **kwds), when=when, reraise=reraise\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_hooks.py\", line 513, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_manager.py\", line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_callers.py\", line 139, in _multicall\n    raise exception.with_traceback(exception.__traceback__)\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_callers.py\", line 122, in _multicall\n    teardown.throw(exception)  # type: ignore[union-attr]\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/threadexception.py\", line 87, in pytest_runtest_call\n    yield from thread_exception_runtest_hook()\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/threadexception.py\", line 63, in thread_exception_runtest_hook\n    yield\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_callers.py\", line 122, in _multicall\n    teardown.throw(exception)  # type: ignore[union-attr]\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/unraisableexception.py\", line 90, in pytest_runtest_call\n    yield from unraisable_exception_runtest_hook()\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/unraisableexception.py\", line 65, in unraisable_exception_runtest_hook\n    yield\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_callers.py\", line 122, in _multicall\n    teardown.throw(exception)  # type: ignore[union-attr]\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/logging.py\", line 850, in pytest_runtest_call\n    yield from self._runtest_for(item, \"call\")\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/logging.py\", line 833, in _runtest_for\n    yield\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_callers.py\", line 122, in _multicall\n    teardown.throw(exception)  # type: ignore[union-attr]\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/capture.py\", line 878, in pytest_runtest_call\n    return (yield)\n            ^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_callers.py\", line 122, in _multicall\n    teardown.throw(exception)  # type: ignore[union-attr]\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/skipping.py\", line 257, in pytest_runtest_call\n    return (yield)\n            ^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_callers.py\", line 103, in _multicall\n    res = hook_impl.function(*args)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/runner.py\", line 183, in pytest_runtest_call\n    raise e\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/runner.py\", line 173, in pytest_runtest_call\n    item.runtest()\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/python.py\", line 1632, in runtest\n    self.ihook.pytest_pyfunc_call(pyfuncitem=self)\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_hooks.py\", line 513, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_manager.py\", line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_callers.py\", line 139, in _multicall\n    raise exception.with_traceback(exception.__traceback__)\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/pluggy/_callers.py\", line 103, in _multicall\n    res = hook_impl.function(*args)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/.venv/lib/python3.12/site-packages/_pytest/python.py\", line 162, in pytest_pyfunc_call\n    result = testfunction(**testargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"/Users/krystian.safjan/projects/priv/pytest-failure-tracker/tests/test_failure_tracker.py\", line 5, in test_plugin_failure\n    assert False\n"
+      ]
+    }
+  }
+}
