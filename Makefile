@@ -41,11 +41,11 @@ lint: ## check style with flake8
 
 format: ## Run code formatter: black and isort
 	@echo "(isort) Ordering imports..."
-	@isort src tests
+	@isort --profile black src tests
 	@echo "(black) Formatting codebase..."
-	@black --config setup.cfg src tests
+	@black --config black.toml src tests
 	@echo "(black) Formatting stubs..."
-	@find src -name "*.pyi" ! -name "*_pb2*" -exec black --pyi --config setup.cfg {} \;
+	@find src -name "*.pyi" ! -name "*_pb2*" -exec black --pyi --config black.toml {} \;
 	@echo "(ruff) Running fix only..."
 	@ruff check src tests --fix-only
 
