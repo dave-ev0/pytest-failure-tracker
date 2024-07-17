@@ -161,6 +161,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 .idea/
-.idea/
-.idea/
-.idea/
+test_results.json
+**/test_results.json
