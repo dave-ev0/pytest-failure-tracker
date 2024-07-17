@@ -16,9 +16,8 @@ twine
 
 # ----- Docs
 sphinx
-sphinx-rtd-theme
 sphinx-autobuild
 furo
-watchdog
-recommonmark
 myst-parser
+
+watchdog
