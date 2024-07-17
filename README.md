@@ -92,7 +92,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License.
+[MIT](https://izikeros.mit-license.org/) © [Krystian Safjan](https://safjan.com).
 
 
 TODO: expand documentation with:
