@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="pytest-failure-tracker",
-    version="0.2.1",
+    version="0.2.2",
     author="Krystian Safjan",
     author_email="ksafjan@gmail.com",
     description="A pytest plugin for tracking test failures over multiple runs",
