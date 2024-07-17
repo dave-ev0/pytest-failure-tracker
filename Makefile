@@ -13,7 +13,7 @@ endef
 export PRINT_HELP_PYSCRIPT
 
 help:
-	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+	@python3 -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 
@@ -38,6 +38,16 @@ clean-test: ## remove test and coverage artifacts
 
 lint: ## check style with flake8
 	flake8 src tests
+
+format: ## Run code formatter: black and isort
+	@echo "(isort) Ordering imports..."
+	@isort src tests
+	@echo "(black) Formatting codebase..."
+	@black --config setup.cfg src tests
+	@echo "(black) Formatting stubs..."
+	@find src -name "*.pyi" ! -name "*_pb2*" -exec black --pyi --config setup.cfg {} \;
+	@echo "(ruff) Running fix only..."
+	@ruff check src tests --fix-only
 
 test: ## run tests quickly with the default Python
 	pytest
