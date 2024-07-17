@@ -2,11 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [0.2.3] - 2024-07-17
 
 ### Other
 
 - Update git clif config
+- Update changelog
+- Update git cliff config
+- Fix artificially braking test
+- Bump version: 0.2.2 → 0.2.3
+
 
 ## [0.2.2] - 2024-07-17
 
