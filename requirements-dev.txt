@@ -1,10 +1,12 @@
 flake8
 pytest
-tox
+nox
 coverage
 sphinx
 watchdog
 twine
+black
+isort
 wheel
 bump2version
 setuptools
