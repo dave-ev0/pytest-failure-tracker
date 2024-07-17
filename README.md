@@ -1,5 +1,9 @@
 # pytest-failure-tracker
 
+![img](https://img.shields.io/pypi/v/pytest-failure-tracker.svg)
+![](https://img.shields.io/pypi/pyversions/pytest-failure-tracker.svg)
+![](https://img.shields.io/pypi/dm/pytest-failure-tracker.svg)
+
 A pytest plugin for tracking test failures over multiple test runs, making it easier to identify flaky tests and frequently failing tests.
 
 ## Installation
