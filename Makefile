@@ -36,8 +36,8 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-lint: ## check style with flake8
-	flake8 src tests
+lint: ## check style with ruff
+	ruff src tests
 
 format: ## Run code formatter: black and isort
 	@echo "(isort) Ordering imports..."
@@ -61,7 +61,6 @@ coverage: ## check code coverage quickly with the default Python
 	coverage html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/source/*.rst
 	sphinx-apidoc -o docs/source src
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
