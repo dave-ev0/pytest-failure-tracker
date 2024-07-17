@@ -103,7 +103,6 @@ def test_pytest_sessionstart_new_file(mock_session, temp_dir):
     assert mock_session.results == {}
 
 
-
 # Test for pytest_sessionstart function with an existing file
 def test_pytest_sessionstart_existing_file(mock_session, temp_dir):
     """
@@ -129,7 +128,6 @@ def test_pytest_sessionstart_existing_file(mock_session, temp_dir):
     with patch("pytest_failure_tracker.plugin.RESULTS_FILE", results_file):
         pytest_sessionstart(mock_session)
     assert mock_session.results == existing_results
-    assert False
 
 
 # Test for pytest_runtest_makereport function
@@ -182,7 +180,7 @@ def test_pytest_runtest_makereport(mock_session, outcome, expected):
     setattr(report, "passed" if outcome != "passed" else "failed", False)
 
     with patch("pytest_failure_tracker.plugin.datetime") as mock_datetime, patch(
-            "pytest_failure_tracker.plugin.traceback.format_tb"
+        "pytest_failure_tracker.plugin.traceback.format_tb"
     ) as mock_format_tb:
         mock_datetime.now.return_value.isoformat.return_value = "2021-01-01T00:00:00"
         mock_format_tb.return_value = ["Traceback line 1", "Traceback line 2"]
@@ -206,8 +204,8 @@ def test_pytest_runtest_makereport(mock_session, outcome, expected):
 
     if outcome == "failed":
         assert (
-                mock_session.results["test::id"]["last_failure"]["timestamp"]
-                == "2021-01-01T00:00:00"
+            mock_session.results["test::id"]["last_failure"]["timestamp"]
+            == "2021-01-01T00:00:00"
         )
         assert mock_session.results["test::id"]["last_failure"]["traceback"] == [
             "Traceback line 1",
@@ -282,5 +280,5 @@ def test_pytest_terminal_summary(mock_config, temp_dir):
 
     terminalreporter.section.assert_called_once_with("Test Failure Tracking Summary")
     assert (
-            terminalreporter.write_line.call_count == 11
+        terminalreporter.write_line.call_count == 11
     )  # Number of lines in the summary
