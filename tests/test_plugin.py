@@ -16,6 +16,7 @@ from pytest_failure_tracker.plugin import (
 )
 
 
+# Fixture to create a temporary directory for test files
 @pytest.fixture
 def temp_dir():
     """Create a temporary directory for test files."""
@@ -24,6 +25,7 @@ def temp_dir():
     shutil.rmtree(temp_dir)
 
 
+# Fixture to create a mock pytest config object
 @pytest.fixture
 def mock_config():
     """Create a mock pytest config object."""
@@ -32,6 +34,7 @@ def mock_config():
     return config
 
 
+# Fixture to create a mock pytest session object
 @pytest.fixture
 def mock_session(mock_config, temp_dir):
     """Create a mock pytest session object."""
@@ -41,7 +44,18 @@ def mock_session(mock_config, temp_dir):
     return session
 
 
+# Test for pytest_configure function
 def test_pytest_configure():
+    """
+    Purpose: Verify that pytest_configure adds the correct marker to the config.
+
+    Testing approach:
+    1. Create a mock config object
+    2. Call pytest_configure with the mock config
+    3. Assert that addinivalue_line was called with the correct arguments
+
+    Notes: Using Mock objects to simulate pytest behavior
+    """
     config = Mock()
     pytest_configure(config)
     config.addinivalue_line.assert_called_once_with(
@@ -49,7 +63,18 @@ def test_pytest_configure():
     )
 
 
+# Test for pytest_addoption function
 def test_pytest_addoption():
+    """
+    Purpose: Ensure that pytest_addoption adds the correct command-line option.
+
+    Testing approach:
+    1. Create a mock parser object
+    2. Call pytest_addoption with the mock parser
+    3. Assert that addoption was called with the correct arguments
+
+    Notes: Using Mock objects to simulate pytest behavior
+    """
     parser = Mock()
     pytest_addoption(parser)
     parser.addoption.assert_called_once_with(
@@ -57,14 +82,45 @@ def test_pytest_addoption():
     )
 
 
+# Test for pytest_sessionstart function with a new file
 def test_pytest_sessionstart_new_file(mock_session, temp_dir):
+    """
+    Purpose: Verify that pytest_sessionstart initializes an empty results dictionary when no file exists.
+
+    Testing approach:
+    1. Set up a mock session and a temporary directory
+    2. Patch the RESULTS_FILE constant to use a file in the temporary directory
+    3. Call pytest_sessionstart
+    4. Assert that the session.results is an empty dictionary
+
+    Notes:
+    - Using fixtures (mock_session, temp_dir) for setup
+    - Patching constants to control file locations
+    """
     results_file = Path(temp_dir) / "test_results.json"
     with patch("pytest_failure_tracker.plugin.RESULTS_FILE", results_file):
         pytest_sessionstart(mock_session)
     assert mock_session.results == {}
 
 
+
+# Test for pytest_sessionstart function with an existing file
 def test_pytest_sessionstart_existing_file(mock_session, temp_dir):
+    """
+    Purpose: Verify that pytest_sessionstart loads existing results when a file is present.
+
+    Testing approach:
+    1. Set up a mock session and a temporary directory
+    2. Create a test results file with sample data
+    3. Patch the RESULTS_FILE constant to use the created file
+    4. Call pytest_sessionstart
+    5. Assert that the session.results contains the data from the file
+
+    Notes:
+    - Using fixtures for setup
+    - Creating and manipulating files for testing
+    - Patching constants to control file locations
+    """
     results_file = Path(temp_dir) / "test_results.json"
     existing_results = {"test::id": {"passes": 1, "failures": 0, "skips": 0}}
     with open(results_file, "w") as f:
@@ -73,8 +129,10 @@ def test_pytest_sessionstart_existing_file(mock_session, temp_dir):
     with patch("pytest_failure_tracker.plugin.RESULTS_FILE", results_file):
         pytest_sessionstart(mock_session)
     assert mock_session.results == existing_results
+    assert False
 
 
+# Test for pytest_runtest_makereport function
 @pytest.mark.parametrize(
     "outcome,expected",
     [
@@ -84,6 +142,21 @@ def test_pytest_sessionstart_existing_file(mock_session, temp_dir):
     ],
 )
 def test_pytest_runtest_makereport(mock_session, outcome, expected):
+    """
+    Purpose: Verify that pytest_runtest_makereport correctly updates test results for different outcomes.
+
+    Testing approach:
+    1. Set up mock objects for item, call, and report
+    2. Parametrize the test with different outcomes (passed, failed, skipped)
+    3. Call pytest_runtest_makereport using a generator pattern
+    4. Assert that the session results are updated correctly for each outcome
+
+    Notes:
+    - Using parameterized tests to cover multiple scenarios
+    - Mocking complex objects (item, call, report)
+    - Testing generator functions using the send() method
+    - Patching datetime and traceback modules for consistent output
+    """
     item = Mock()
     item.nodeid = "test::id"
     item.session = mock_session
@@ -109,7 +182,7 @@ def test_pytest_runtest_makereport(mock_session, outcome, expected):
     setattr(report, "passed" if outcome != "passed" else "failed", False)
 
     with patch("pytest_failure_tracker.plugin.datetime") as mock_datetime, patch(
-        "pytest_failure_tracker.plugin.traceback.format_tb"
+            "pytest_failure_tracker.plugin.traceback.format_tb"
     ) as mock_format_tb:
         mock_datetime.now.return_value.isoformat.return_value = "2021-01-01T00:00:00"
         mock_format_tb.return_value = ["Traceback line 1", "Traceback line 2"]
@@ -133,8 +206,8 @@ def test_pytest_runtest_makereport(mock_session, outcome, expected):
 
     if outcome == "failed":
         assert (
-            mock_session.results["test::id"]["last_failure"]["timestamp"]
-            == "2021-01-01T00:00:00"
+                mock_session.results["test::id"]["last_failure"]["timestamp"]
+                == "2021-01-01T00:00:00"
         )
         assert mock_session.results["test::id"]["last_failure"]["traceback"] == [
             "Traceback line 1",
@@ -142,7 +215,22 @@ def test_pytest_runtest_makereport(mock_session, outcome, expected):
         ]
 
 
+# Test for pytest_sessionfinish function
 def test_pytest_sessionfinish(mock_session, temp_dir):
+    """
+    Purpose: Verify that pytest_sessionfinish correctly saves the session results to a file.
+
+    Testing approach:
+    1. Set up a mock session with sample results
+    2. Patch the RESULTS_FILE constant to use a file in the temporary directory
+    3. Call pytest_sessionfinish
+    4. Assert that the file was created and contains the correct data
+
+    Notes:
+    - Using fixtures for setup
+    - Patching constants to control file locations
+    - Verifying file contents after function execution
+    """
     results_file = Path(temp_dir) / "test_results.json"
     mock_session.results = {"test::id": {"passes": 1, "failures": 0, "skips": 0}}
 
@@ -154,7 +242,24 @@ def test_pytest_sessionfinish(mock_session, temp_dir):
     assert saved_results == mock_session.results
 
 
+# Test for pytest_terminal_summary function
 def test_pytest_terminal_summary(mock_config, temp_dir):
+    """
+    Purpose: Ensure that pytest_terminal_summary correctly generates and writes the summary report.
+
+    Testing approach:
+    1. Create a sample results file with test data
+    2. Set up a mock terminal reporter
+    3. Patch the RESULTS_FILE constant to use the created file
+    4. Call pytest_terminal_summary
+    5. Assert that the correct number of lines were written and the section was created
+
+    Notes:
+    - Using fixtures for setup
+    - Creating sample data files for testing
+    - Mocking complex objects (terminalreporter)
+    - Verifying multiple function calls on mock objects
+    """
     results_file = Path(temp_dir) / "test_results.json"
     results = {
         "test::id": {
@@ -177,5 +282,5 @@ def test_pytest_terminal_summary(mock_config, temp_dir):
 
     terminalreporter.section.assert_called_once_with("Test Failure Tracking Summary")
     assert (
-        terminalreporter.write_line.call_count == 11
+            terminalreporter.write_line.call_count == 11
     )  # Number of lines in the summary
