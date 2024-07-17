@@ -28,5 +28,5 @@ setup(
     entry_points={
         "pytest11": ["failure_tracker = pytest_failure_tracker.plugin"],
     },
-    python_requires=">=3.6",
+    python_requires=">=3.7",
 )
