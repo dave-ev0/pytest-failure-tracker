@@ -13,7 +13,7 @@ exclude = [
 line-length = 88
 indent-width = 4
 
-# Assume Python 3.12
+# Assume Python 3.7
 target-version = "py37"
 
 [lint]
