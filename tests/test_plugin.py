@@ -65,20 +65,14 @@ def test_pytest_configure():
 
 # Test for pytest_addoption function
 def test_pytest_addoption():
-    """
-    Purpose: Ensure that pytest_addoption adds the correct command-line option.
-
-    Testing approach:
-    1. Create a mock parser object
-    2. Call pytest_addoption with the mock parser
-    3. Assert that addoption was called with the correct arguments
-
-    Notes: Using Mock objects to simulate pytest behavior
-    """
+    """Test that the plugin adds the correct command line option."""
     parser = Mock()
     pytest_addoption(parser)
     parser.addoption.assert_called_once_with(
-        "--track-failures", action="store_true", help="Track test failures across runs"
+        "--track-failures",
+        dest="track_failures",
+        action="store_true",
+        help="Track test failures across runs"
     )
 
 

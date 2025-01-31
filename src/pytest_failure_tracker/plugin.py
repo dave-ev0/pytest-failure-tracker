@@ -16,17 +16,22 @@ def pytest_configure(config):
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--track-failures", action="store_true", help="Track test failures across runs"
+        "--track-failures",
+        dest="track_failures",
+        action="store_true",
+        help="Track test failures across runs"
     )
 
 
 def pytest_sessionstart(session):
     if session.config.getoption("track_failures"):
+        session.results = {}
         if RESULTS_FILE.exists():
-            with open(RESULTS_FILE) as f:
-                session.results = json.load(f)
-        else:
-            session.results = {}
+            try:
+                with open(RESULTS_FILE) as f:
+                    session.results = json.load(f)
+            except json.JSONDecodeError:
+                session.results = {}
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -34,8 +39,11 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
 
+    if not hasattr(item.session, "results"):
+        item.session.results = {}
+
     if item.config.getoption("track_failures"):
-        test_id = f"{item.nodeid}"
+        test_id = item.nodeid
 
         if test_id not in item.session.results:
             item.session.results[test_id] = {
@@ -59,7 +67,8 @@ def pytest_runtest_makereport(item, call):
 
 
 def pytest_sessionfinish(session):
-    if session.config.getoption("track_failures"):
+    if session.config.getoption("track_failures") and hasattr(session, "results"):
+        RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(RESULTS_FILE, "w") as f:
             json.dump(session.results, f, indent=2)
 
