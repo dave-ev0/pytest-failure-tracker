@@ -31,9 +31,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/dmccror1/pytest-analytics"
-Repository = "https://github.com/dmccror1/pytest-analytics.git"
-Documentation = "https://github.com/dmccror1/pytest-analytics#readme"
+Homepage = "https://github.com/dave-ev0/pytest-analytics"
+Repository = "https://github.com/dave-ev0/pytest-analytics.git"
+Documentation = "https://github.com/dave-ev0/pytest-analytics#readme"
 
 [project.entry-points.pytest11]
 analytics = "pytest_analytics.plugin"

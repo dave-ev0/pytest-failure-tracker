@@ -82,9 +82,9 @@ test_example.py::test_function:
     Failure rate: 20.00%
     Failed 1 times in 5 runs
   Recent history:
-    ✗ 2024-01-01T00:00:00 - failed (0.100s)
+    ✗ 2025-01-01T00:00:00 - failed (0.100s)
       Error: Test failed
-    ✓ 2024-01-01T00:00:01 - passed (0.050s)
+    ✓ 2025-01-01T00:00:01 - passed (0.050s)
 
 ==== Test Trends Analysis ====
 
@@ -95,7 +95,7 @@ Slowest Tests:
   test_example.py::test_function: 0.075s average duration
 
 Recent Failures:
-  test_example.py::test_function: Last failed at 2024-01-01T00:00:00
+  test_example.py::test_function: Last failed at 2025-01-01T00:00:00
 ```
 
 ## Database Schema
@@ -239,7 +239,7 @@ pytest tests/
 
 ## Changelog
 
-### 1.0.0 (2024-01)
+### 1.0.0 (2025-01)
 - Initial release with DuckDB backend
 - Added comprehensive test analytics
 - Added flaky test detection
