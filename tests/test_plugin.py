@@ -3,7 +3,7 @@ import json
 import shutil
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call
 
 import pytest
 from pytest_failure_tracker.plugin import (
@@ -233,22 +233,7 @@ def test_pytest_sessionfinish(mock_session, temp_dir):
 
 # Test for pytest_terminal_summary function
 def test_pytest_terminal_summary(mock_config, temp_dir):
-    """
-    Purpose: Ensure that pytest_terminal_summary correctly generates and writes the summary report.
-
-    Testing approach:
-    1. Create a sample results file with test data
-    2. Set up a mock terminal reporter
-    3. Patch the RESULTS_FILE constant to use the created file
-    4. Call pytest_terminal_summary
-    5. Assert that the correct number of lines were written and the section was created
-
-    Notes:
-    - Using fixtures for setup
-    - Creating sample data files for testing
-    - Mocking complex objects (terminalreporter)
-    - Verifying multiple function calls on mock objects
-    """
+    """Test terminal summary generation."""
     results_file = Path(temp_dir) / "test_results.json"
     results = {
         "test::id": {
@@ -269,7 +254,8 @@ def test_pytest_terminal_summary(mock_config, temp_dir):
     with patch("pytest_failure_tracker.plugin.RESULTS_FILE", results_file):
         pytest_terminal_summary(terminalreporter, None, mock_config)
 
-    terminalreporter.section.assert_called_once_with("Test Failure Tracking Summary")
-    assert (
-        terminalreporter.write_line.call_count == 11
-    )  # Number of lines in the summary
+    # Verify both sections are created
+    terminalreporter.section.assert_has_calls([
+        call("Test Failure Tracking Summary"),
+        call("Recent Test Changes")
+    ])

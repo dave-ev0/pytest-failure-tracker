@@ -164,7 +164,7 @@ class TestResultsDB:
 
         return results
 
-    def get_flaky_tests(self, min_runs: int = 5, min_failure_rate: float = 0.1):
+    def get_flaky_tests(self, min_runs: int = 2, min_failure_rate: float = 0.1):
         """Identify flaky tests (tests that sometimes pass and sometimes fail)."""
         return self.conn.execute("""
             SELECT 
@@ -172,12 +172,12 @@ class TestResultsDB:
                 total_runs,
                 passes,
                 failures,
-                failure_rate
+                CAST(failures AS DOUBLE) / NULLIF(total_runs, 0) as failure_rate
             FROM test_summary
             WHERE total_runs >= ?
-                AND failure_rate >= ?
                 AND passes > 0 
                 AND failures > 0
+                AND CAST(failures AS DOUBLE) / NULLIF(total_runs, 0) >= ?
             ORDER BY failure_rate DESC
         """, [min_runs, min_failure_rate]).fetchall()
 

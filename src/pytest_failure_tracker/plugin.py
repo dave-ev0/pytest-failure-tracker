@@ -3,6 +3,7 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 import sys
+import platform
 
 import pytest
 from .db import TestResultsDB
@@ -31,37 +32,38 @@ def pytest_addoption(parser):
 
 
 def pytest_sessionstart(session):
-    if session.config.getoption("track_failures"):
-        project_root = Path.cwd()
-        session.test_db = TestResultsDB(project_root)
-        session.test_run_id = session.test_db.start_test_run(
-            pytest_version=pytest.__version__,
-            python_version=f"{sys.version_info.major}.{sys.version_info.minor}"
-        )
+    """Initialize test tracking for the session."""
+    project_root = Path.cwd()
+    session.test_db = TestResultsDB(project_root)
+    session.test_run_id = session.test_db.start_test_run(
+        pytest_version=pytest.__version__,
+        python_version=platform.python_version()
+    )
+    
+    # Initialize results from existing file if it exists
+    if RESULTS_FILE.exists():
+        with open(RESULTS_FILE) as f:
+            session.results = json.load(f)
+    else:
+        session.results = {}
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
-    outcome = yield
-    report = outcome.get_result()
-
-    if item.config.getoption("track_failures") and report.when == "call":
-        status = "passed" if report.passed else "failed" if report.failed else "skipped"
-        
-        error_message = None
-        error_traceback = None
-        if report.failed:
-            error_message = str(call.excinfo.value)
-            error_traceback = "".join(traceback.format_tb(call.excinfo.tb))
-
-        item.session.test_db.add_test_result(
-            run_id=item.session.test_run_id,
-            test_id=item.nodeid,
-            status=status,
-            duration=report.duration,
-            error_message=error_message,
-            error_traceback=error_traceback
-        )
+    """Hook implementation to track test results."""
+    report = (yield).get_result()
+    
+    if report.when == "call" or (report.when == "setup" and report.skipped):
+        test_id = item.nodeid
+        if test_id not in item.session.results:
+            item.session.results[test_id] = {"passes": 0, "failures": 0, "skips": 0}
+            
+        if report.passed:
+            item.session.results[test_id]["passes"] += 1
+        elif report.failed:
+            item.session.results[test_id]["failures"] += 1
+        elif report.skipped:
+            item.session.results[test_id]["skips"] += 1
 
 
 def pytest_sessionfinish(session):
