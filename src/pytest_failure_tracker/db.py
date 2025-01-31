@@ -2,8 +2,11 @@ import duckdb
 from datetime import datetime
 from pathlib import Path
 import json
+import pytest
 
+@pytest.mark.no_collect  # This tells pytest explicitly not to collect this class
 class TestResultsDB:
+    """Database for tracking test results over time."""
     def __init__(self, project_root: Path):
         self.project_root = project_root
         self.db_path = project_root / ".pytest_tracker" / "results.db"
@@ -14,19 +17,28 @@ class TestResultsDB:
 
     def _init_tables(self):
         """Initialize the database tables if they don't exist."""
+        # Create sequences
+        self.conn.execute("CREATE SEQUENCE IF NOT EXISTS run_id_seq START 1")
+        self.conn.execute("CREATE SEQUENCE IF NOT EXISTS result_id_seq START 1")
+
+        # Drop existing tables if they exist
+        self.conn.execute("DROP TABLE IF EXISTS test_results")
+        self.conn.execute("DROP TABLE IF EXISTS test_runs")
+
+        # Create test_runs table
         self.conn.execute("""
-            CREATE SEQUENCE IF NOT EXISTS run_id_seq;
-            CREATE SEQUENCE IF NOT EXISTS result_id_seq;
-            
-            CREATE TABLE IF NOT EXISTS test_runs (
-                run_id INTEGER PRIMARY KEY DEFAULT nextval('run_id_seq'),
+            CREATE TABLE test_runs (
+                run_id INTEGER PRIMARY KEY,
                 timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 pytest_version VARCHAR NOT NULL,
                 python_version VARCHAR NOT NULL
-            );
+            )
+        """)
 
-            CREATE TABLE IF NOT EXISTS test_results (
-                result_id INTEGER PRIMARY KEY DEFAULT nextval('result_id_seq'),
+        # Create test_results table
+        self.conn.execute("""
+            CREATE TABLE test_results (
+                result_id INTEGER PRIMARY KEY,
                 run_id INTEGER NOT NULL,
                 test_id VARCHAR NOT NULL,
                 status VARCHAR NOT NULL CHECK (status IN ('passed', 'failed', 'skipped')),
@@ -35,10 +47,10 @@ class TestResultsDB:
                 error_traceback VARCHAR,
                 timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (run_id) REFERENCES test_runs(run_id)
-            );
+            )
         """)
 
-        # Create views for common queries using more efficient aggregations
+        # Create view for summary
         self.conn.execute("""
             CREATE OR REPLACE VIEW test_summary AS
             SELECT 

@@ -33,6 +33,9 @@ def pytest_addoption(parser):
 
 def pytest_sessionstart(session):
     """Initialize test tracking for the session."""
+    if not session.config.getoption("track_failures"):
+        return
+        
     project_root = Path.cwd()
     session.test_db = TestResultsDB(project_root)
     session.test_run_id = session.test_db.start_test_run(
@@ -53,6 +56,9 @@ def pytest_runtest_makereport(item, call):
     """Hook implementation to track test results."""
     report = (yield).get_result()
     
+    if not item.config.getoption("track_failures"):
+        return
+        
     if report.when == "call" or (report.when == "setup" and report.skipped):
         test_id = item.nodeid
         if test_id not in item.session.results:
@@ -75,6 +81,23 @@ def pytest_runtest_makereport(item, call):
             }
         elif report.skipped:
             item.session.results[test_id]["skips"] += 1
+
+        # Also store in database
+        status = "passed" if report.passed else "failed" if report.failed else "skipped"
+        error_message = None
+        error_traceback = None
+        if report.failed and hasattr(call, 'excinfo'):
+            error_message = str(call.excinfo.value)
+            error_traceback = "".join(traceback.format_tb(call.excinfo.tb))
+
+        item.session.test_db.add_test_result(
+            run_id=item.session.test_run_id,
+            test_id=test_id,
+            status=status,
+            duration=report.duration,
+            error_message=error_message,
+            error_traceback=error_traceback
+        )
 
 
 def pytest_sessionfinish(session):
