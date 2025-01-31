@@ -56,12 +56,23 @@ def pytest_runtest_makereport(item, call):
     if report.when == "call" or (report.when == "setup" and report.skipped):
         test_id = item.nodeid
         if test_id not in item.session.results:
-            item.session.results[test_id] = {"passes": 0, "failures": 0, "skips": 0}
+            item.session.results[test_id] = {
+                "passes": 0,
+                "failures": 0,
+                "skips": 0,
+                "last_failure": None
+            }
             
         if report.passed:
             item.session.results[test_id]["passes"] += 1
         elif report.failed:
             item.session.results[test_id]["failures"] += 1
+            # Add failure information
+            item.session.results[test_id]["last_failure"] = {
+                "timestamp": datetime.now().isoformat(),
+                "traceback": traceback.format_tb(call.excinfo.tb) if hasattr(call, 'excinfo') else None,
+                "error_message": str(call.excinfo.value) if hasattr(call, 'excinfo') else None
+            }
         elif report.skipped:
             item.session.results[test_id]["skips"] += 1
 

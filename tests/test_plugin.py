@@ -144,7 +144,12 @@ def test_pytest_sessionstart_existing_file(mock_session, temp_dir):
 def test_pytest_runtest_makereport(mock_session, outcome, expected):
     """Test pytest_runtest_makereport with different outcomes."""
     # Initialize the results dictionary
-    mock_session.results = {"test::id": {"passes": 0, "failures": 0, "skips": 0}}
+    mock_session.results = {"test::id": {
+        "passes": 0,
+        "failures": 0,
+        "skips": 0,
+        "last_failure": None
+    }}
     
     item = Mock()
     item.nodeid = "test::id"
@@ -192,16 +197,12 @@ def test_pytest_runtest_makereport(mock_session, outcome, expected):
     assert mock_session.results["test::id"]["passes"] == expected["passes"]
     assert mock_session.results["test::id"]["failures"] == expected["failures"]
     assert mock_session.results["test::id"]["skips"] == expected["skips"]
-
+    
     if outcome == "failed":
-        assert (
-            mock_session.results["test::id"]["last_failure"]["timestamp"]
-            == "2021-01-01T00:00:00"
-        )
-        assert mock_session.results["test::id"]["last_failure"]["traceback"] == [
-            "Traceback line 1",
-            "Traceback line 2",
-        ]
+        assert mock_session.results["test::id"]["last_failure"]["timestamp"] == "2021-01-01T00:00:00"
+        assert mock_session.results["test::id"]["last_failure"]["traceback"] == ["Traceback line 1", "Traceback line 2"]
+    else:
+        assert mock_session.results["test::id"]["last_failure"] is None
 
 
 # Test for pytest_sessionfinish function
