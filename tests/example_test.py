@@ -1,3 +1,9 @@
+"""Example test file to demonstrate pytest-analytics functionality.
+
+Run with:
+    pytest --analytics
+"""
+
 import pytest
 
 def test_passing():

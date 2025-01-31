@@ -1,6 +1,6 @@
-# pytest-failure-tracker
+# pytest-analytics
 
-A pytest plugin that tracks test failures and provides analytics across test runs.
+A pytest plugin that provides comprehensive test analytics, failure tracking, and performance metrics.
 
 ## Author
 - Dave McCrory (dave@ev0.ai)
@@ -8,7 +8,7 @@ A pytest plugin that tracks test failures and provides analytics across test run
 ## Features
 
 - Track test results across multiple runs
-- Store detailed test execution history in SQLite database
+- Store detailed test execution history in DuckDB
 - Generate comprehensive analytics about test behavior
 - Identify flaky tests automatically
 - Track performance metrics and trends
@@ -27,15 +27,15 @@ A pytest plugin that tracks test failures and provides analytics across test run
 ## Installation
 
 ```bash
-pip install pytest-failure-tracker
+pip install pytest-analytics
 ```
 
 ## Usage
 
-Enable failure tracking by using the `--track-failures` flag:
+Enable analytics by using the `--analytics` flag:
 
 ```bash
-pytest --track-failures
+pytest --analytics
 ```
 
 Additional options:
@@ -46,10 +46,10 @@ Additional options:
 The plugin provides two main types of output:
 
 1. A JSON file (`test_results.json`) containing detailed test results
-2. A SQLite database (`.pytest_tracker/results.db`) for historical analysis
+2. A DuckDB database (`.pytest_tracker/results.db`) for historical analysis
 3. Terminal summary sections:
 
-### Test Failure Tracking Summary
+### Test Analytics Summary
 Shows per-test details including:
 - Total runs, passes, failures, and skips
 - Failure rate
@@ -66,7 +66,7 @@ Provides aggregate analytics including:
 ## Example Output
 
 ```
-==== Test Failure Tracking Summary ====
+==== Test Analytics Summary ====
 
 test_example.py::test_function:
   Total runs: 5
@@ -223,8 +223,8 @@ The plugin reads these environment variables:
 ### Development Setup
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/pytest-failure-tracker.git
-cd pytest-failure-tracker
+git clone https://github.com/yourusername/pytest-analytics.git
+cd pytest-analytics
 
 # Create and activate virtual environment
 python -m venv .venv

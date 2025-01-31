@@ -9,7 +9,7 @@ class TestResultsDB:
     """Database for tracking test results over time."""
     def __init__(self, project_root: Path):
         self.project_root = project_root
-        self.db_path = project_root / ".pytest_tracker" / "results.db"
+        self.db_path = project_root / ".pytest_analytics" / "results.db"
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         
         self.conn = duckdb.connect(str(self.db_path))

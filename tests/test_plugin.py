@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch, call
 
 import pytest
-from pytest_failure_tracker.plugin import (
+from pytest_analytics.plugin import (
     pytest_addoption,
     pytest_configure,
     pytest_runtest_makereport,
@@ -46,20 +46,11 @@ def mock_session(mock_config, temp_dir):
 
 # Test for pytest_configure function
 def test_pytest_configure():
-    """
-    Purpose: Verify that pytest_configure adds the correct marker to the config.
-
-    Testing approach:
-    1. Create a mock config object
-    2. Call pytest_configure with the mock config
-    3. Assert that addinivalue_line was called with the correct arguments
-
-    Notes: Using Mock objects to simulate pytest behavior
-    """
+    """Verify that pytest_configure adds the correct marker to the config."""
     config = Mock()
     pytest_configure(config)
     config.addinivalue_line.assert_called_once_with(
-        "markers", "track_failures: mark test to have its failures tracked"
+        "markers", "analytics: mark test to have its analytics tracked"
     )
 
 
@@ -71,10 +62,10 @@ def test_pytest_addoption():
     
     parser.addoption.assert_has_calls([
         call(
-            "--track-failures",
+            "--analytics",
             dest="track_failures",
             action="store_true",
-            help="Track test failures across runs"
+            help="Track test analytics, failures, and performance metrics"
         ),
         call(
             "--show-flaky-tests",
@@ -100,7 +91,7 @@ def test_pytest_sessionstart_new_file(mock_session, temp_dir):
     - Patching constants to control file locations
     """
     results_file = Path(temp_dir) / "test_results.json"
-    with patch("pytest_failure_tracker.plugin.RESULTS_FILE", results_file):
+    with patch("pytest_analytics.plugin.RESULTS_FILE", results_file):
         pytest_sessionstart(mock_session)
     assert mock_session.results == {}
 
@@ -127,7 +118,7 @@ def test_pytest_sessionstart_existing_file(mock_session, temp_dir):
     with open(results_file, "w") as f:
         json.dump(existing_results, f)
 
-    with patch("pytest_failure_tracker.plugin.RESULTS_FILE", results_file):
+    with patch("pytest_analytics.plugin.RESULTS_FILE", results_file):
         pytest_sessionstart(mock_session)
     assert mock_session.results == existing_results
 
@@ -175,8 +166,8 @@ def test_pytest_runtest_makereport(mock_session, outcome, expected):
     setattr(report, "skipped" if outcome != "skipped" else "failed", False)
     setattr(report, "passed" if outcome != "passed" else "failed", False)
 
-    with patch("pytest_failure_tracker.plugin.datetime") as mock_datetime, patch(
-        "pytest_failure_tracker.plugin.traceback.format_tb"
+    with patch("pytest_analytics.plugin.datetime") as mock_datetime, patch(
+        "pytest_analytics.plugin.traceback.format_tb"
     ) as mock_format_tb:
         mock_datetime.now.return_value.isoformat.return_value = "2021-01-01T00:00:00"
         mock_format_tb.return_value = ["Traceback line 1", "Traceback line 2"]
@@ -224,7 +215,7 @@ def test_pytest_sessionfinish(mock_session, temp_dir):
     results_file = Path(temp_dir) / "test_results.json"
     mock_session.results = {"test::id": {"passes": 1, "failures": 0, "skips": 0}}
 
-    with patch("pytest_failure_tracker.plugin.RESULTS_FILE", results_file):
+    with patch("pytest_analytics.plugin.RESULTS_FILE", results_file):
         pytest_sessionfinish(mock_session)
 
     with open(results_file) as f:
@@ -234,7 +225,15 @@ def test_pytest_sessionfinish(mock_session, temp_dir):
 
 # Test for pytest_terminal_summary function
 def test_pytest_terminal_summary(mock_config, temp_dir):
-    """Test terminal summary generation with analytics."""
+    """Test terminal summary generation with comprehensive analytics.
+    
+    Verifies:
+    - Basic test statistics
+    - Performance metrics
+    - Flaky test detection
+    - Test history tracking
+    - Trend analysis
+    """
     from unittest.mock import call  # Import call locally to ensure it's in scope
     
     results_file = Path(temp_dir) / "test_results.json"
@@ -291,13 +290,13 @@ def test_pytest_terminal_summary(mock_config, temp_dir):
     mock_db = Mock()
     mock_db.generate_summary_json.return_value = results
 
-    with patch("pytest_failure_tracker.plugin.RESULTS_FILE", results_file), \
-         patch("pytest_failure_tracker.plugin.TestResultsDB", return_value=mock_db):
+    with patch("pytest_analytics.plugin.RESULTS_FILE", results_file), \
+         patch("pytest_analytics.plugin.TestResultsDB", return_value=mock_db):
         pytest_terminal_summary(terminalreporter, None, mock_config)
 
     # Verify sections are created
     terminalreporter.section.assert_has_calls([
-        call("Test Failure Tracking Summary"),
+        call("Test Analytics Summary"),
         call("Test Trends Analysis")
     ])
 

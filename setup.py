@@ -1,32 +1,33 @@
-from setuptools import find_packages, setup
+from setuptools import setup, find_packages
 
 setup(
-    name="pytest-failure-tracker",
-    version="0.2.3",
-    author="Krystian Safjan",
-    author_email="ksafjan@gmail.com",
-    description="A pytest plugin for tracking test failures over multiple runs",
-    long_description=open("README.md").read(), # noqa SIM115
-    long_description_content_type="text/markdown",
-    url="https://github.com/izikeros/pytest-failure-tracker",
-    package_dir={"": "src"},
+    name="pytest-analytics",
+    version="1.0.0",
+    description="A pytest plugin that tracks test analytics, failures, and performance metrics",
+    author="Dave McCrory",
+    author_email="dave@ev0.ai",
+    url="https://github.com/dmccror1/pytest-analytics",
     packages=find_packages(where="src"),
-    install_requires=["pytest>=6.0.0"],
-    classifiers=[
-        "Framework :: Pytest",
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-        'Programming Language :: Python :: 3.12',
-        'Programming Language :: Python :: 3 :: Only',
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+    package_dir={"": "src"},
+    install_requires=[
+        "pytest>=6.0.0",
+        "duckdb>=0.9.0"
     ],
     entry_points={
-        "pytest11": ["failure_tracker = pytest_failure_tracker.plugin"],
+        "pytest11": ["analytics = pytest_analytics.plugin"]
     },
-    python_requires=">=3.7",
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Framework :: Pytest",
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Testing",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Operating System :: OS Independent",
+        "License :: OSI Approved :: MIT License",
+    ],
+    python_requires=">=3.8",
 )

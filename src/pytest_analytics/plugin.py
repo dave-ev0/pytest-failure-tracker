@@ -13,16 +13,16 @@ RESULTS_FILE = Path("test_results.json")
 
 def pytest_configure(config):
     config.addinivalue_line(
-        "markers", "track_failures: mark test to have its failures tracked"
+        "markers", "analytics: mark test to have its analytics tracked"
     )
 
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--track-failures",
+        "--analytics",
         dest="track_failures",
         action="store_true",
-        help="Track test failures across runs"
+        help="Track test analytics, failures, and performance metrics"
     )
     parser.addoption(
         "--show-flaky-tests",
@@ -114,19 +114,11 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
     db = TestResultsDB(Path.cwd())
     results = db.generate_summary_json()
     
-    # Debug print
-    print("\nDEBUG - Results from DB:")
-    print(json.dumps(results, indent=2))
-
     # Basic Summary
-    terminalreporter.section("Test Failure Tracking Summary")
+    terminalreporter.section("Test Analytics Summary")
     for test_id, data in results.items():
         total_runs = data["analytics"]["total_runs"]
         failure_rate = data["failure_rate"]
-
-        # Debug print
-        print(f"\nDEBUG - Processing test: {test_id}")
-        print(f"DEBUG - Data: {json.dumps(data, indent=2)}")
 
         terminalreporter.write_line(f"\n{test_id}:")
         terminalreporter.write_line(f"  Total runs: {total_runs}")

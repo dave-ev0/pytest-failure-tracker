@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timedelta
 from pathlib import Path
-from pytest_failure_tracker.db import TestResultsDB
+from pytest_analytics.db import TestResultsDB
 import duckdb
 
 @pytest.fixture
@@ -37,8 +37,8 @@ def test_db(tmp_path):
 def test_init_creates_directory(tmp_path):
     """Test that database initialization creates the necessary directory."""
     db = TestResultsDB(tmp_path)
-    assert (tmp_path / ".pytest_tracker").exists()
-    assert (tmp_path / ".pytest_tracker" / "results.db").exists()
+    assert (tmp_path / ".pytest_analytics").exists()
+    assert (tmp_path / ".pytest_analytics" / "results.db").exists()
 
 def test_start_test_run(test_db):
     """Test starting a new test run."""
