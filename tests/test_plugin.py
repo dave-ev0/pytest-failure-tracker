@@ -234,29 +234,108 @@ def test_pytest_sessionfinish(mock_session, temp_dir):
 
 # Test for pytest_terminal_summary function
 def test_pytest_terminal_summary(mock_config, temp_dir):
-    """Test terminal summary generation."""
+    """Test terminal summary generation with analytics."""
+    from unittest.mock import call  # Import call locally to ensure it's in scope
+    
     results_file = Path(temp_dir) / "test_results.json"
+    
+    test_id = "tests/test_plugin.py::test_pytest_terminal_summary"
+    
+    # Create sample test results with analytics data
     results = {
-        "test::id": {
+        test_id: {  # Use the actual test ID
             "passes": 3,
             "failures": 1,
             "skips": 1,
+            "failure_rate": 0.2,
             "last_failure": {
-                "timestamp": "2021-01-01T00:00:00",
+                "timestamp": "2024-01-01T00:00:00",
                 "traceback": ["line1", "line2"],
+                "error_message": "Test failed"
             },
+            "history": [
+                {
+                    "timestamp": "2024-01-01T00:00:00",
+                    "status": "failed",
+                    "duration": 0.1,
+                    "error_message": "Test failed"
+                },
+                {
+                    "timestamp": "2024-01-01T00:00:01",
+                    "status": "passed",
+                    "duration": 0.05,
+                    "error_message": None
+                }
+            ],
+            "analytics": {
+                "total_runs": 5,
+                "is_flaky": True,
+                "flaky_details": {
+                    "failure_rate": 0.2,
+                    "total_failures": 1,
+                    "total_runs": 5
+                },
+                "performance": {
+                    "avg_duration": 0.075,
+                    "min_duration": 0.05,
+                    "max_duration": 0.1
+                }
+            }
         }
     }
+
     with open(results_file, "w") as f:
         json.dump(results, f)
 
     terminalreporter = Mock()
+    mock_db = Mock()
+    mock_db.generate_summary_json.return_value = results
 
-    with patch("pytest_failure_tracker.plugin.RESULTS_FILE", results_file):
+    with patch("pytest_failure_tracker.plugin.RESULTS_FILE", results_file), \
+         patch("pytest_failure_tracker.plugin.TestResultsDB", return_value=mock_db):
         pytest_terminal_summary(terminalreporter, None, mock_config)
 
-    # Verify both sections are created
+    # Verify sections are created
     terminalreporter.section.assert_has_calls([
         call("Test Failure Tracking Summary"),
-        call("Recent Test Changes")
+        call("Test Trends Analysis")
     ])
+
+    # Verify all analytics information is written
+    expected_lines = [
+        f"\n{test_id}:",  # Use the actual test ID
+        "  Total runs: 5",
+        "  Passes: 3",
+        "  Failures: 1",
+        "  Skips: 1",
+        "  Failure rate: 20.00%",
+        "  Performance:",
+        "    Average duration: 0.075s",
+        "    Min duration: 0.050s",
+        "    Max duration: 0.100s",
+        "  ⚠️ Flaky Test:",
+        "    Failure rate: 20.00%",
+        "    Failed 1 times in 5 runs",
+        "  Recent history:",
+        "    ✗ 2024-01-01T00:00:00 - failed (0.100s)",
+        "      Error: Test failed",
+        "    ✓ 2024-01-01T00:00:01 - passed (0.050s)",
+        "\nPotentially Flaky Tests:",
+        f"  {test_id}: 20.00% failure rate",  # Use the actual test ID
+        "\nSlowest Tests:",
+        f"  {test_id}: 0.075s average duration",  # Use the actual test ID
+        "\nRecent Failures:",
+        f"  {test_id}: Last failed at 2024-01-01T00:00:00"  # Use the actual test ID
+    ]
+
+    # Print actual calls for debugging
+    print("\nActual calls:")
+    for call in terminalreporter.write_line.call_args_list:
+        print(f"  {call}")
+
+    # Verify each line was written
+    for line in expected_lines:
+        terminalreporter.write_line.assert_any_call(line)
+
+    # Verify total number of write_line calls
+    assert terminalreporter.write_line.call_count == len(expected_lines)

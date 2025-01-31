@@ -112,14 +112,21 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
         return
 
     db = TestResultsDB(Path.cwd())
+    results = db.generate_summary_json()
     
+    # Debug print
+    print("\nDEBUG - Results from DB:")
+    print(json.dumps(results, indent=2))
+
     # Basic Summary
     terminalreporter.section("Test Failure Tracking Summary")
-    results = db.generate_summary_json()
-
     for test_id, data in results.items():
-        total_runs = data["passes"] + data["failures"] + data["skips"]
-        failure_rate = data["failures"] / total_runs if total_runs > 0 else 0
+        total_runs = data["analytics"]["total_runs"]
+        failure_rate = data["failure_rate"]
+
+        # Debug print
+        print(f"\nDEBUG - Processing test: {test_id}")
+        print(f"DEBUG - Data: {json.dumps(data, indent=2)}")
 
         terminalreporter.write_line(f"\n{test_id}:")
         terminalreporter.write_line(f"  Total runs: {total_runs}")
@@ -128,32 +135,68 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
         terminalreporter.write_line(f"  Skips: {data['skips']}")
         terminalreporter.write_line(f"  Failure rate: {failure_rate:.2%}")
 
-        if data["last_failure"]:
-            terminalreporter.write_line(f"  Last failure: {data['last_failure']['timestamp']}")
-            terminalreporter.write_line("  Last failure traceback:")
-            for line in data["last_failure"]["traceback"]:
-                terminalreporter.write_line(f"    {line.strip()}")
+        # Performance Analytics
+        if "performance" in data["analytics"]:
+            perf = data["analytics"]["performance"]
+            terminalreporter.write_line(f"  Performance:")
+            terminalreporter.write_line(f"    Average duration: {perf['avg_duration']:.3f}s")
+            terminalreporter.write_line(f"    Min duration: {perf['min_duration']:.3f}s")
+            terminalreporter.write_line(f"    Max duration: {perf['max_duration']:.3f}s")
 
-    # Flaky Tests Analysis
-    flaky_tests = db.get_flaky_tests()
+        # Flaky Test Analysis
+        if data["analytics"]["is_flaky"]:
+            flaky = data["analytics"]["flaky_details"]
+            terminalreporter.write_line(f"  ⚠️ Flaky Test:")
+            terminalreporter.write_line(f"    Failure rate: {flaky['failure_rate']:.2%}")
+            terminalreporter.write_line(f"    Failed {flaky['total_failures']} times in {flaky['total_runs']} runs")
+
+        # Recent History
+        if data["history"]:
+            terminalreporter.write_line("  Recent history:")
+            for entry in data["history"]:
+                status_symbol = "✓" if entry["status"] == "passed" else "✗" if entry["status"] == "failed" else "⚪"
+                terminalreporter.write_line(
+                    f"    {status_symbol} {entry['timestamp']} - {entry['status']} "
+                    f"({entry['duration']:.3f}s)"
+                )
+                if entry["error_message"]:
+                    terminalreporter.write_line(f"      Error: {entry['error_message']}")
+
+    # Trend Analysis Section
+    terminalreporter.section("Test Trends Analysis")
+    
+    # Show Flaky Tests
+    flaky_tests = [test_id for test_id, data in results.items() if data["analytics"]["is_flaky"]]
     if flaky_tests:
-        terminalreporter.section("Flaky Tests Analysis")
-        terminalreporter.write_line("Tests that sometimes pass and sometimes fail:")
-        for test in flaky_tests:
+        terminalreporter.write_line("\nPotentially Flaky Tests:")
+        for test_id in flaky_tests:
+            data = results[test_id]
             terminalreporter.write_line(
-                f"  {test[0]}: {test[4]:.1%} failure rate ({test[3]} of {test[1]} runs failed)"
+                f"  {test_id}: {data['analytics']['flaky_details']['failure_rate']:.2%} failure rate"
             )
 
-    # Recent Test History
-    terminalreporter.section("Recent Test Changes")
-    for test_id in results:
-        history = db.get_test_history(test_id, limit=5)
-        if history and any(result[1] == 'failed' for result in history):
-            terminalreporter.write_line(f"\n{test_id} recent history:")
-            for timestamp, status, duration, error_msg in history:
-                terminalreporter.write_line(
-                    f"  {timestamp.strftime('%Y-%m-%d %H:%M:%S')} - {status} "
-                    f"(duration: {duration:.2f}s)"
-                )
-                if error_msg:
-                    terminalreporter.write_line(f"    Error: {error_msg}")
+    # Show Slowest Tests
+    slow_tests = sorted(
+        [(test_id, data) for test_id, data in results.items() if "performance" in data["analytics"]],
+        key=lambda x: x[1]["analytics"]["performance"]["avg_duration"],
+        reverse=True
+    )[:5]
+    
+    if slow_tests:
+        terminalreporter.write_line("\nSlowest Tests:")
+        for test_id, data in slow_tests:
+            avg_duration = data["analytics"]["performance"]["avg_duration"]
+            terminalreporter.write_line(f"  {test_id}: {avg_duration:.3f}s average duration")
+
+    # Show Recently Failed Tests
+    recent_failures = [
+        (test_id, data) for test_id, data in results.items()
+        if data["last_failure"] and data["last_failure"]["timestamp"]
+    ]
+    recent_failures.sort(key=lambda x: x[1]["last_failure"]["timestamp"], reverse=True)
+    
+    if recent_failures:
+        terminalreporter.write_line("\nRecent Failures:")
+        for test_id, data in recent_failures[:5]:
+            timestamp = data["last_failure"]["timestamp"]
+            terminalreporter.write_line(f"  {test_id}: Last failed at {timestamp}")

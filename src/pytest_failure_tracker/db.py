@@ -17,17 +17,9 @@ class TestResultsDB:
 
     def _init_tables(self):
         """Initialize the database tables if they don't exist."""
-        # Create sequences
-        self.conn.execute("CREATE SEQUENCE IF NOT EXISTS run_id_seq START 1")
-        self.conn.execute("CREATE SEQUENCE IF NOT EXISTS result_id_seq START 1")
-
-        # Drop existing tables if they exist
-        self.conn.execute("DROP TABLE IF EXISTS test_results")
-        self.conn.execute("DROP TABLE IF EXISTS test_runs")
-
-        # Create test_runs table
+        # Create test_runs table first
         self.conn.execute("""
-            CREATE TABLE test_runs (
+            CREATE TABLE IF NOT EXISTS test_runs (
                 run_id INTEGER PRIMARY KEY,
                 timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 pytest_version VARCHAR NOT NULL,
@@ -37,7 +29,7 @@ class TestResultsDB:
 
         # Create test_results table
         self.conn.execute("""
-            CREATE TABLE test_results (
+            CREATE TABLE IF NOT EXISTS test_results (
                 result_id INTEGER PRIMARY KEY,
                 run_id INTEGER NOT NULL,
                 test_id VARCHAR NOT NULL,
@@ -49,6 +41,16 @@ class TestResultsDB:
                 FOREIGN KEY (run_id) REFERENCES test_runs(run_id)
             )
         """)
+
+        # Get current max values
+        max_run_id = self.conn.execute("SELECT COALESCE(MAX(run_id), 0) FROM test_runs").fetchone()[0]
+        max_result_id = self.conn.execute("SELECT COALESCE(MAX(result_id), 0) FROM test_results").fetchone()[0]
+
+        # Create sequences with correct starting values
+        self.conn.execute(f"DROP SEQUENCE IF EXISTS run_id_seq")
+        self.conn.execute(f"DROP SEQUENCE IF EXISTS result_id_seq")
+        self.conn.execute(f"CREATE SEQUENCE run_id_seq START {max_run_id + 1}")
+        self.conn.execute(f"CREATE SEQUENCE result_id_seq START {max_result_id + 1}")
 
         # Create view for summary
         self.conn.execute("""
