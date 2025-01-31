@@ -65,15 +65,23 @@ def test_pytest_configure():
 
 # Test for pytest_addoption function
 def test_pytest_addoption():
-    """Test that the plugin adds the correct command line option."""
+    """Test that the plugin adds the correct command line options."""
     parser = Mock()
     pytest_addoption(parser)
-    parser.addoption.assert_called_once_with(
-        "--track-failures",
-        dest="track_failures",
-        action="store_true",
-        help="Track test failures across runs"
-    )
+    
+    parser.addoption.assert_has_calls([
+        call(
+            "--track-failures",
+            dest="track_failures",
+            action="store_true",
+            help="Track test failures across runs"
+        ),
+        call(
+            "--show-flaky-tests",
+            action="store_true",
+            help="Show potentially flaky tests in the summary"
+        )
+    ])
 
 
 # Test for pytest_sessionstart function with a new file
@@ -134,21 +142,10 @@ def test_pytest_sessionstart_existing_file(mock_session, temp_dir):
     ],
 )
 def test_pytest_runtest_makereport(mock_session, outcome, expected):
-    """
-    Purpose: Verify that pytest_runtest_makereport correctly updates test results for different outcomes.
-
-    Testing approach:
-    1. Set up mock objects for item, call, and report
-    2. Parametrize the test with different outcomes (passed, failed, skipped)
-    3. Call pytest_runtest_makereport using a generator pattern
-    4. Assert that the session results are updated correctly for each outcome
-
-    Notes:
-    - Using parameterized tests to cover multiple scenarios
-    - Mocking complex objects (item, call, report)
-    - Testing generator functions using the send() method
-    - Patching datetime and traceback modules for consistent output
-    """
+    """Test pytest_runtest_makereport with different outcomes."""
+    # Initialize the results dictionary
+    mock_session.results = {"test::id": {"passes": 0, "failures": 0, "skips": 0}}
+    
     item = Mock()
     item.nodeid = "test::id"
     item.session = mock_session
